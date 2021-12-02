@@ -7,20 +7,21 @@
 
 extern int errno;
 
-long int sum_three(long int a, long int b, long int c);
+int sum_three(long int *d, long int a, long int b, long int c);
 
-inline long int sum_three(long int a, long int b, long int c) {
-	int err;
+int sum_three(long int *d, long int a, long int b, long int c) {
+	int err = 0;
+
+	ASSERT(d != NULL, err0, -1, "Null pointer exception\n");
 
 	ASSERT(a >= 0 && b <= LONG_MAX - a || a < 0 && b >= LONG_MIN - a, err0, -1, "Integer overflow!\n");
-	long int d = a + b;
+	*d = a + b;
 
-	ASSERT(d >= 0 && c <= LONG_MAX - d || d < 0 && c >= LONG_MIN - d, err0, -1, "Integer overflow!\n" );
-	return d + c;
+	ASSERT(*d >= 0 && c <= LONG_MAX - *d || *d < 0 && c >= LONG_MIN - *d, err0, -1, "Integer overflow!\n" );
+	*d = *d + c;
 
 err0:
-	errno = ERANGE;
-	return 0;
+	return err;
 }
 
 
@@ -55,11 +56,13 @@ int main() {
 		long int d = strtol(line, &end, 10);
 		ASSERT(line != end && errno == 0, err3, -3, "Invalid input.\n");
 
-		long int x = sum_three(b, c, d);
-		ASSERT(errno == 0, err3, -4, "Integer overflow!\n");
+		long int x = 0;
+		err = sum_three(&x, b, c, d);
+		ASSERT(err == 0, err3, err, "Integer overflow!\n");
 
-		long int y = sum_three(a, b, c);
-		ASSERT(errno == 0, err3, -4, "Integer overflow!\n");
+		long int y = 0;
+		err = sum_three(&y, a, b, c);
+		ASSERT(err == 0, err3, err, "Integer overflow!\n");
 
 		if (x > y) {
 			ASSERT(UINT_MAX-counter >= 1, err3, -4, "Integer Overflow!\n");
