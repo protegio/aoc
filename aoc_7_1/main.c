@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define ASSERT(expression, label, err_code, error_msg) do { if (!(expression)) { printf(error_msg); err = err_code; goto label; } } while(0)
 #define ABS_DIFF(a, b) (a > b ? a - b : b - a)
@@ -81,6 +82,7 @@ err0:
 }
 
 int main() {
+	float startTime = (float)clock()/CLOCKS_PER_SEC;
 	int err = 0;
 	
 	// Open the input file
@@ -99,8 +101,11 @@ int main() {
 
 	read = getline(&line, &len, input_file);
 	ASSERT(read != -1, err1, -5, "Invalid input (empty)\n");
+	float startTimeAfterRead = (float)clock()/CLOCKS_PER_SEC;
+
 	err = split2int(line, ",", values, &values_counter, &max, 0);
 	ASSERT(err == 0 && values_counter > 0, err1, err, "Invalid input.\n");
+	float startTimeAfterParse = (float)clock()/CLOCKS_PER_SEC;
 
 	unsigned long int current_values[2048];
 	unsigned int i = 0;
@@ -110,7 +115,6 @@ int main() {
 	for (i = 0; i < values_counter; i++) {
 		current_values[values[i]]++;
 	}
-
 
 	unsigned long int result = ULONG_MAX;
 	unsigned long int fuel = 0;
@@ -132,6 +136,11 @@ int main() {
 	}
 	printf("Result: %lu\n", result);
 
+	float endTime = (float)clock()/CLOCKS_PER_SEC;
+	float timeElapsed = endTime - startTime;
+	printf("Time Total: %fms\n", timeElapsed*1000);
+	printf("Time after read: %fms\n", 1000*(endTime-startTimeAfterRead));
+	printf("Time after parser: %fms\n", 1000*(endTime-startTimeAfterParse));
 err1:
 	if (line != NULL) {
 		free(line);
